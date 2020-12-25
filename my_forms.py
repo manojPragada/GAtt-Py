@@ -11,6 +11,9 @@ class AddForm(FlaskForm):
     submit = SubmitField('Add User')
 
 # class CompareFaces(FlaskForm):
-
+class attendanceForm(FlaskForm):
+    classid = StringField('classid', validators=[DataRequired(), Length(min=2, max=15)])
+    date = StringField('date', validators=[DataRequired()])
+    submit = SubmitField('submit')
 
 

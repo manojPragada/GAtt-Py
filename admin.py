@@ -3,6 +3,7 @@ import hashlib
 import os
 import sys
 from datetime import datetime
+from waitress import serve
 import base64
 import MySQLdb.cursors
 import pytz
@@ -15,6 +16,7 @@ from flask_wtf.file import FileField, FileRequired, FileAllowed
 from wtforms import StringField, SubmitField
 from wtforms.validators import DataRequired, Length
 import face_comparision
+import my_forms
 from my_forms import AddForm
 from functools import wraps
 
@@ -383,6 +385,25 @@ def addStudent():
     return render_template('addStudent.html', form=form, msg_s=ms, msg_e=me)
 
 
+# attendance
+@app.route('/home/attendance', methods=['GET', 'POST'])
+@login_required
+def attendancePage():
+    form = my_forms.attendanceForm()
+    data = {}
+    if form.validate_on_submit():
+        class_id = form.classid.data
+        date = form.date.data
+        date = str(datetime.strptime(date, "%Y-%m-%d").strftime("%d/%m/%Y"))
+        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        if cursor.execute("SELECT * FROM `attendance` WHERE class_id=%s AND date=%s", (class_id, date)):
+            data = cursor.fetchall()
+            return render_template('attendance.html', form=form, msg_e="", data=data)
+        else:
+            return render_template('attendance.html', form=form, msg_e="No Attendance data for: "+date, data=data)
+    return render_template('attendance.html', form=form, msg_e="", data=data)
+
+
 # api
 # login
 @app.route('/api/login', methods=['POST'])
@@ -585,6 +606,7 @@ api.add_resource(Attendance, '/api/attendance')
 
 def convert_and_save(b64_string, course_id, ty):
     path = ty
+    print(b64_string, file=sys.stdout)
     with open(path, "wb") as fh:
         fh.write(base64.decodebytes(b64_string.encode()))
         return fh
@@ -605,4 +627,5 @@ def getDate():
 
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    # app.run(debug=True, host='0.0.0.0', port=5000)
+    serve(app, port=5000)
