@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+	 <script src="{{ url_for('static', filename='js/timetable.js') }}"></script>
+    <script src="https://kit.fontawesome.com/a076d05399.js"></script>
+    <title>GAtt-Time Tables</title>
+    <style type="text/css" rel="stylesheet">
+        body{
+        font-size: 12px
+        }
+        .nav-tabs > li {
+            float:none;
+            display:inline-block;
+            zoom:1;
+        }
+    </style>
+</head>
+<body>
+    {% include "header.html"%}
+ <div class="container border rounded border-secondary col-md-11" style="margin-top:20px">
+     <div class="col-md-12" style="padding: 30px 0px 30px 0px">
+         <center class="col-md-12" style="font-size: 18px">Edit/Add Timetable</center>
+         <hr class="col-md-9">
+         {% for message in get_flashed_messages() %}
+            <p class="col-md-12" style="font-size: 18px;color:#de1f1f"> {{ message }} </p>
+         {% endfor %}
+         <ul class="nav nav-tabs" style="text-align: center">
+          <li class="nav-item">
+            <a style="color: #000000" class="nav-link active" id="home-tab" data-toggle="tab" href="#edit" role="tab" aria-controls="home" aria-selected="true">Edit Timetable</a>
+          </li>
+          <li class="nav-item">
+            <a style="color: #000000" class="nav-link" id="profile-tab" data-toggle="tab" href="#add" role="tab" aria-controls="profile" aria-selected="false">Add Timetable</a>
+          </li>
+        </ul>
+         <div class="tab-content">
+            <div id="edit" class="tab-pane active">
+                <form class="form col-md-12" style="margin-top: 40px" method="post">
+                    {{ form1.hidden_tag() }}
+                    <div class="col-md-6 form-group">
+                        <label class="col-md-4">Faculty Id:</label>
+                        {{ form1.faculE(list="faculty", class="form-control form-control-lg",autocomplete="off",required="true") }}
+<!--                        <input list="faculty" autocomplete="off" id="facultyInp">-->
+                    </div>
+                    <div class="col-md-6 form-group">
+                        {{ form1.submit(class="btn btn-outline-info col-md-2", type="submit") }}
+<!--                        <input type="submit" class="btn btn-info" autocomplete="off" id="getT">-->
+                    </div>
+                </form>
+            </div>
+             <div id="add" class="tab-pane fade">
+                 <form class="col-md-12 form-inline" method="POST" enctype="multipart/form-data" style="margin: 30px 0px 20px 0px">
+                 {{ form.hidden_tag() }}
+                 <div class="form-group col-md-6">
+                     <label class="col-md-4">Faculty Id:</label>
+                        {{ form.facultyId(class="form-control form-control-lg",autocomplete="off", list="faculty",required="true") }}
+                        <datalist id="faculty">
+                            {% for row in data %}
+                                <option value={{row['user_id']}}>{{ row['username']+', '+row['email'] }}</option>
+                            {% endfor %}
+                        </datalist>
+                 </div>
+                 <div class="form-group col-md-3">
+                     <label class="col">Session start Time:</label>
+                        {{ form.startTime(type="time", class="form-control form-control-lg",autocomplete="off",required="true") }}
+                 </div>
+                 <div class="form-group col-md-3">
+                     <label class="col">Session start Time:</label>
+                        {{ form.endTime(type="time", class="form-control form-control-lg",autocomplete="off",required="true") }}
+                 </div>
+                 <div class="form-group col-md-6" style="margin-top: 20px">
+                     <label class="col-md-4">Weekday:</label>
+                        {{ form.weekday(class="form-control form-control-lg",autocomplete="off", list="weekdays",required="true") }}
+                        <datalist id="weekdays">
+                            <option value="Monday">Monday</option>
+                            <option value="Tuesday">Tuesday</option>
+                            <option value="Wednesday">Wednesday</option>
+                            <option value="Thursday">Thursday</option>
+                            <option value="Friday">Friday</option>
+                            <option value="Saturday">Saturday</option>
+                        </datalist>
+                 </div>
+                 <div class="form-group col-md-6" style="margin-top: 20px">
+                     <label class="col-md-4">Subject :</label>
+                        {{ form.subject(type="text", class="form-control form-control-lg",autocomplete="off",required="true") }}
+                 </div>
+                 <div class="form-group col-md-6" style="margin-top: 20px">
+                     <label class="col-md-4">Course ID :</label>
+                        {{ form.courseId(type="text", class="form-control form-control-lg",autocomplete="off",required="true") }}
+                 </div>
+                 <div class="form-group col-md-6" style="margin-top: 20px">
+                     <label class="col-md-4">Class ID :</label>
+                        {{ form.classId(type="text", class="form-control form-control-lg",autocomplete="off",required="true") }}
+                 </div>
+                 <div class="form-group col-md-6" style="margin-top: 20px">
+                     <label class="col-md-4">Branch:</label>
+                        {{ form.branch(class="form-control form-control-lg",autocomplete="off", list="brancher",required="true") }}
+                        <datalist id="brancher">
+                            <option value="CSE">
+                            <option value="ECE">
+                            <option value="MECH">
+                            <option value="EEE">
+                            <option value="CIVIL">
+                        </datalist>
+                 </div>
+                 <div class="form-group col-md-6" style="margin-top: 20px">
+                     <label class="col-md-4">Section :</label>
+                        {{ form.section(type="text", class="form-control form-control-lg",autocomplete="off",required="true") }}
+                 </div>
+                 <div class="form-group col-md-6" style="margin-top: 20px">
+                     <label class="col-md-4">Start Year :</label>
+                        {{ form.startYear(type="text", class="form-control form-control-lg",autocomplete="off",required="true") }}
+                 </div>
+                 <div class="form-group col-md-6" style="margin-top: 20px">
+                     <label class="col-md-4">End Year :</label>
+                        {{ form.endYear(type="text", class="form-control form-control-lg",autocomplete="off",required="true") }}
+                 </div>
+                 <div class="form-group col-md-6" style="margin-top: 20px">
+                     <label class="col-md-4">Sem Number :</label>
+                        {{ form.sem(type="text", class="form-control form-control-lg",autocomplete="off",required="true") }}
+                 </div>
+                 <div class="form-group col-md-12">
+                     <center class="col-md-12" style="margin-top: 50px">
+                        {{ form.submit(class="btn btn-outline-info col-md-2") }}
+                     </center>
+                 </div>
+             </form>
+             </div>
+         </div>
+     </div>
+     {% if datas %}
+     <div id="listTTDiv" class="container border rounded border-secondary col-md-11" style="margin-top: 20px; margin-bottom:20px">
+        <div style="padding: 30px 0px 30px 0px">
+        <h4>Timetable List</h4>
+        <div style="padding: 20px">
+            <table class="table">
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">User Id</th>
+                    <th scope="col">Class Id</th>
+                    <th scope="col">Course Id</th>
+                    <th scope="col">Section</th>
+                    <th scope="col">Branch</th>
+                    <th scope="col">Sem</th>
+                    <th scope="col">Subject</th>
+                    <th scope="col">Weekday</th>
+                    <th scope="col">Session</th>
+                    <th scope="col">Year</th>
+                    <th scope="col">Action</th>
+                </tr>
+                {% for row in datas %}
+                    <tr>
+                        <td>{{ loop.index }}</td>
+                        <td>{{ row['user_id'] }}</td>
+                        <td>{{ row['class_id'] }}</td>
+                        <td>{{ row['course_id'] }}</td>
+                        <td>{{ row['sec'] }}</td>
+                        <td>{{ row['branch'] }}</td>
+                        <td>{{ row['sem'] }}</td>
+                        <td>{{ row['subj'] }}</td>
+                        <td>{{ row['day'] }}</td>
+                        <td>{{ row['sessions'] }}</td>
+                        <td>{{ row['year'] }}</td>
+                        <td><a href="/home/timeTable/{{row['id']}}/{{row['user_id']}}/{{row['class_id']}}/{{row['course_id']}}/{{row['sec']}}/{{row['branch']}}/{{row['sem']}}/{{row['subj']}}/{{row['day']}}/{{row['sessions']}}/{{row['year']}}">
+                            <i class='fas fa-edit' style='font-size:18px;color:blue'></i></a>
+                            <span>&nbsp;&nbsp;&nbsp;&nbsp;</span><a href="/home/timeTable/delete/{{row['user_id']}}/{{row['id']}}"><i class='fas fa-trash-alt' style='font-size:18px;color:red'></i></a></td>
+                    </tr>
+                {% endfor %}
+            </table>
+        </div>
+        </div>
+    </div>
+     {% endif %}
+ </div>
+</body>
+</html>

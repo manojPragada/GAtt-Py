@@ -1,0 +1,23 @@
+@import url('https://fonts.googleapis.com/css?family=Raleway:400,700');
+ *, *:before, *:after {
+	 box-sizing: border-box;
+}
+ body {
+
+/*
+*
+* ==========================================
+* CUSTOM UTIL CLASSES
+* ==========================================
+*
+*/
+
+.bg-image {
+  background-image: url('https://res.cloudinary.com/mhmd/image/upload/v1555917661/art-colorful-contemporary-2047905_dxtao7.jpg');
+  background-size: cover;
+  background-position: center center;
+}
+.login,
+.image {
+  min-height: 100vh;
+}

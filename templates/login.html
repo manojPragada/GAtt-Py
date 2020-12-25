@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>GAtt-Login</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link type="text/css" rel="stylesheet" href="{{ url_for('static', filename='login.css') }}" />
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+
+</head>
+<body>
+    <div class="container-fluid">
+    <div class="row no-gutter">
+        <!-- The image half -->
+        <div class="col-md-6 d-none d-md-flex bg-image" style="
+        background-image: url('https://toppng.com/uploads/preview/patterns-veil-red-black-dark-11570118420sfbrkcyi4c.jpg');
+  background-size: cover;
+  background-position: center;min-height: 100vh; text_align: center">
+            <center style="margin: auto">
+                <img src="https://upload.wikimedia.org/wikipedia/en/thumb/0/02/Pics_gitam_tee.jpg/220px-Pics_gitam_tee.jpg">
+            </center>
+        </div>
+
+
+        <!-- The content half -->
+        <div class="col-md-6 bg-light">
+            <div class="login d-flex align-items-center py-5">
+
+                <!-- Demo content-->
+                <div class="container">
+                    <div class="row">
+                        <div class="col-lg-10 col-xl-7 mx-auto">
+                            <h3 class="display-4">Admin Login</h3>
+                            <p class="text-muted mb-2">Enter your User Name and Password.</p>
+                            <p class="col-md-12" style="font-size: 18px;color:#52c738">{{ msg_s }}</p>
+                            <p class="col-md-12" style="font-size: 18px;color:#de1f1f">{{ msg_e }}</p>
+                            {% for message in get_flashed_messages() %}
+                                <p class="col-md-12" style="font-size: 18px;color:#de1f1f"> {{ message }} </p>
+                                {% endfor %}
+                            <form method="post">
+                                {{ form.hidden_tag() }}
+                                <div class="form-group mb-4">
+                                    {{ form.userName( id="inputEmail", type="text", placeholder="User Name",
+                                    required="", autofocus="", class="form-control rounded-pill border-0 shadow-sm px-4",
+                                    maxlength="10" )}}
+                                </div>
+                                <div class="form-group mb-4">
+                                    {{ form.password( id="inputPassword", type="password", maxlength="25",
+                                    placeholder="Password", required="", class="form-control rounded-pill border-0 shadow-sm px-4 text-primary")}}
+                                </div>
+                                {{ form.submit( type="submit", value="Sign in", class="btn btn-primary btn-block text-uppercase rounded-pill shadow-sm")}}
+                            </form>
+                        </div>
+                    </div>
+                </div><!-- End -->
+
+            </div>
+        </div><!-- End -->
+
+    </div>
+</div>
+</body>
+</html>
