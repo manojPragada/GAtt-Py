@@ -40,6 +40,10 @@ patch_request_class(app)
 
 # def checker():
 #     if 'user_name' in session:
+class GetStudentForm(FlaskForm):
+    classid = StringField('classid', validators=[DataRequired(), Length(min=2, max=20)])
+    submit = SubmitField('Get Data')
+
 
 class AddStudentForm(FlaskForm):
     courseid = StringField('courseid', validators=[DataRequired(), Length(min=2, max=20)])
@@ -51,6 +55,18 @@ class AddStudentForm(FlaskForm):
     studentimage = FileField('studentimage',
                              validators=[FileAllowed(photos, 'Image Only!'), FileRequired('Choose a file!')])
     submit = SubmitField('Add Student')
+
+
+class UpdateStudentForm(FlaskForm):
+    courseid = StringField('courseid', validators=[DataRequired(), Length(min=2, max=20)])
+    studentid = StringField('studentid', validators=[DataRequired(), Length(min=2, max=20)])
+    studentname = StringField('studentname', validators=[DataRequired(), Length(min=2, max=50)])
+    studentbranch = StringField('studentbranch', validators=[DataRequired(), Length(min=2, max=80)])
+    studentyear = StringField('studentyear', validators=[DataRequired(), Length(min=2, max=10)])
+    studentsection = StringField('studentsection', validators=[DataRequired(), Length(min=1, max=10)])
+    studentimage = FileField('studentimage',
+                             validators=[FileAllowed(photos, 'Image Only!')])
+    submit = SubmitField('Update Student')
 
 
 class AdminLoginForm(FlaskForm):
@@ -130,6 +146,18 @@ def addUser():
             mysql.connection.commit()
             cursor.close()
     return render_template('index.html', form=form, data=data)
+
+
+@app.route('/home/deleteUser/<user_id>', methods=['GET'])
+@login_required
+def deleteUser(user_id):
+    if user_id is not None:
+        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        cursor.execute('''DELETE FROM `users` where user_id=%s''', [user_id])
+        # cursor.execute('''DELETE FROM `time_table` where user_id=%s''', [user_id])
+        mysql.connection.commit()
+        cursor.close()
+    return redirect(url_for('addUser'))
 
 
 @app.route('/home/timeTable', methods=['GET', 'POST'])
@@ -345,16 +373,80 @@ def loginAdmin():
 @login_required
 def dc():
     form = AddStudentForm()
-    return render_template('addStudent.html', form=form, msg_s="", msg_e="")
+    form1 = GetStudentForm()
+    return render_template('addStudent.html', form=form, form1=form1, msg_s="", msg_e="", row="")
+
+
+@app.route('/home/studentEdit/<student_id>', methods=['GET', 'POST'])
+@login_required
+def studentEdit(student_id):
+    form = UpdateStudentForm()
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    img = ""
+    me = ms = ""
+    if cursor.execute('''SELECT * FROM `students` WHERE student_id=%s''', [student_id]):
+        data = cursor.fetchall()
+        data = data[0]
+        form.studentid.data = student_id
+        form.studentname.data = data['student_name']
+        form.studentsection.data = data['student_section']
+        form.studentyear.data = data['student_year']
+        form.studentbranch.data = data['student_branch']
+        form.courseid.data = data['course_id']
+        img = data['student_image']
+    if form.validate_on_submit():
+        form = UpdateStudentForm()
+        courseid = form.courseid.data
+        studentid = form.studentid.data
+        studentname = form.studentname.data
+        studentbranch = form.studentbranch.data
+        studentsection = form.studentsection.data
+        studentyear = form.studentyear.data
+        if form.studentimage.data is None:
+            studentimage = img
+        else:
+            studentimage = base64.b64encode(form.studentimage.data.read())
+        try:
+            if cursor.execute('''UPDATE `students` SET course_id=%s, student_name=%s, student_branch=%s,
+                    student_year=%s, student_section=%s, student_image=%s WHERE student_id=%s''',
+                              (courseid, studentname, studentbranch, studentyear, studentsection, studentimage,
+                               student_id)):
+                ms = "Updated Student Successfully"
+            else:
+                me = "Failed to Update student data "+studentname
+        except (MySQLdb.Error, MySQLdb.Warning) as e:
+            me = e
+    mysql.connection.commit()
+    cursor.close()
+    return render_template('updateStudent.html', form=form, msg_s=ms, msg_e=me, image=img)
+
+
+@app.route('/home/studentDelete/<student_id>', methods=['GET'])
+@login_required
+def studentDelete(student_id):
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    cursor.execute('''DELETE FROM `students` WHERE student_id=%s''', [student_id])
+    mysql.connection.commit()
+    cursor.close()
+    return redirect(url_for('dc'))
 
 
 @app.route('/home/addStudent', methods=['POST'])
 @login_required
 def addStudent():
     form = AddStudentForm()
+    form1 = GetStudentForm()
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     ms = ""
     me = ""
+    dd = ""
+    if form1.validate_on_submit():
+        course_id = form1.classid.data
+        if cursor.execute('''SELECT * FROM `students` WHERE course_id=%s''', [course_id]):
+            dd = cursor.fetchall()
+            mysql.connection.commit()
+            cursor.close()
+        return render_template('addStudent.html', form=form, form1=form1, msg_s="", msg_e="", row=dd)
     if form.validate_on_submit():
         courseid = form.courseid.data
         studentid = form.studentid.data
@@ -382,7 +474,7 @@ def addStudent():
             cursor.close()
     else:
         me = "Not Validated"
-    return render_template('addStudent.html', form=form, msg_s=ms, msg_e=me)
+    return render_template('addStudent.html', form=form, form1=form1, msg_s=ms, msg_e=me, row=dd)
 
 
 # attendance
@@ -400,7 +492,7 @@ def attendancePage():
             data = cursor.fetchall()
             return render_template('attendance.html', form=form, msg_e="", data=data)
         else:
-            return render_template('attendance.html', form=form, msg_e="No Attendance data for: "+date, data=data)
+            return render_template('attendance.html', form=form, msg_e="No Attendance data for: " + date, data=data)
     return render_template('attendance.html', form=form, msg_e="", data=data)
 
 
@@ -606,7 +698,6 @@ api.add_resource(Attendance, '/api/attendance')
 
 def convert_and_save(b64_string, course_id, ty):
     path = ty
-    print(b64_string, file=sys.stdout)
     with open(path, "wb") as fh:
         fh.write(base64.decodebytes(b64_string.encode()))
         return fh
